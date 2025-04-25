@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRippleModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {HttpClient} from '@angular/common/http';
 
 @Component({
@@ -25,7 +26,8 @@ import {HttpClient} from '@angular/common/http';
     MatInputModule,
     MatRippleModule,
     MatAutocompleteModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -43,18 +45,25 @@ export class AppComponent {
   loadNavigation() {
     let cache = localStorage.getItem('navigation')
     if (cache) {
-      this.navigation = JSON.parse(cache);
+      let data = JSON.parse(cache);
+      this.navigation = data.data;
+      if (new Date().getTime() - data.time > 3600 * 4 * 1000) {
+        this.refreshNavigation()
+      }
       this.updateFilteredItems();
 
+    } else {
+      this.refreshNavigation()
     }
+  }
+
+  refreshNavigation() {
     this.http.get(this.navAPI).subscribe((data: any) => {
       this.navigation = data;
-      localStorage.setItem('navigation', JSON.stringify(this.navigation));
+      localStorage.setItem('navigation', JSON.stringify({data: this.navigation, time: new Date().getTime()}));
       this.updateFilteredItems();
 
     })
-
-
   }
 
   onSearch() {
@@ -80,7 +89,7 @@ export class AppComponent {
     this.navigation.categories.forEach(category => {
       category.items.forEach(item => {
         if (item.name.toLowerCase().includes(query) ||
-            item.url.toLowerCase().includes(query)) {
+            item.content.toLowerCase().includes(query)) {
           results.push({
             ...item,
             category: category.name

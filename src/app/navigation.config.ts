@@ -106,7 +106,7 @@ export interface NavigationData {
     icon?: string;
     items: {
       name: string;
-      url: string;
+      content: string;
       favicon?: string;
     }[];
   }[];
