@@ -97,3 +97,17 @@ export const NAVIGATION_DATA = {
     }
   ]
 };
+
+
+export interface NavigationData {
+  searchEngine: string;
+  categories: {
+    name: string;
+    icon?: string;
+    items: {
+      name: string;
+      url: string;
+      favicon?: string;
+    }[];
+  }[];
+}

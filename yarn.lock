@@ -240,25 +240,10 @@
   dependencies:
     tslib "^2.3.0"
 
-"@angular/platform-server@^19.2.0":
-  version "19.2.8"
-  resolved "https://registry.yarnpkg.com/@angular/platform-server/-/platform-server-19.2.8.tgz#1d9417a4764b12bffc0b600d3ab78cbfe14f81f9"
-  integrity sha512-O9xIt4VH06cFyifujzQJuUU0F+wCGZElNasuXurCMe5yVnZ3AQCYWnWje6zBQgAaVHyemfVPcZe3LK1Eih4Jpw==
-  dependencies:
-    tslib "^2.3.0"
-    xhr2 "^0.2.0"
-
 "@angular/router@^19.2.0":
   version "19.2.8"
   resolved "https://registry.yarnpkg.com/@angular/router/-/router-19.2.8.tgz#5323374df8ab6b584503d76780bf9b1b85daa419"
   integrity sha512-aZenxUzrz8idGmw0jsVaPFY8EAPOYcOHmv9mDljzAhJZHaSX/r0iVasnjf5qUkTb7ElpRXppS4wXPNNGKTrXZA==
-  dependencies:
-    tslib "^2.3.0"
-
-"@angular/ssr@^19.2.9":
-  version "19.2.9"
-  resolved "https://registry.yarnpkg.com/@angular/ssr/-/ssr-19.2.9.tgz#19b3d54015e8a53d36816fdb52feff81bba3cae1"
-  integrity sha512-VW1+a9GhWzhlsKZfMenh0SfN0DjPUJY2gWe1v1uC3VmI9usQJxqVWg6+QufenMMj8o3MMa3W2UpmspGxMduc6g==
   dependencies:
     tslib "^2.3.0"
 
@@ -2325,7 +2310,7 @@
     "@types/express-serve-static-core" "^5.0.0"
     "@types/serve-static" "*"
 
-"@types/express@^4.17.17", "@types/express@^4.17.21":
+"@types/express@^4.17.21":
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/@types/express/-/express-4.17.21.tgz#c26d4a151e60efe0084b23dc3369ebc631ed192d"
   integrity sha512-ejlPM315qwLpaQlQDTjPdsUFSc6ZsP4AN6AlWnogPjQ7CVi7PYF3YVz+CY3jE2pwYf7E/7HlDAN0rV2GxTG0HQ==
@@ -3673,7 +3658,7 @@ exponential-backoff@^3.1.1:
   resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.2.tgz#a8f26adb96bf78e8cd8ad1037928d5e5c0679d91"
   integrity sha512-8QxYTVXUkuy7fIIoitQkPwGonB8F3Zj8eEO8Sqg9Zv/bkI7RJAzowee4gr81Hak/dUTpA2Z7VfQgoijjPNlUZA==
 
-express@^4.18.2, express@^4.21.2:
+express@^4.21.2:
   version "4.21.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.21.2.tgz#cf250e48362174ead6cea4a566abef0162c1ec32"
   integrity sha512-28HqgMZAmih1Czt9ny7qr6ek2qddF4FclbMzwhCREB6OFfH+rXAnuNCwo1/wFvrtbgsQDb4kSbX9de9lFbrXnA==
@@ -6908,11 +6893,6 @@ ws@~8.17.1:
   version "8.17.1"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.17.1.tgz#9293da530bb548febc95371d90f9c878727d919b"
   integrity sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==
-
-xhr2@^0.2.0:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/xhr2/-/xhr2-0.2.1.tgz#4e73adc4f9cfec9cbd2157f73efdce3a5f108a93"
-  integrity sha512-sID0rrVCqkVNUn8t6xuv9+6FViXjUVXq8H5rWOH2rz9fDNQEd4g0EA2XlcEdJXRz5BMEn4O1pJFdT+z4YHhoWw==
 
 y18n@^5.0.5:
   version "5.0.8"
