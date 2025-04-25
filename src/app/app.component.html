@@ -3,14 +3,14 @@
   <mat-toolbar  class="mat-elevation-z2">
     <!-- Removed search icon -->
     <form (submit)="onSearch(); $event.preventDefault();" style="flex:1; display:flex; align-items:center;">
-      <input matInput 
-             placeholder="Search the web..." 
-             [(ngModel)]="searchQuery" 
-             name="search" 
-             style="margin-left:8px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;" 
+      <input matInput
+             placeholder="Search the web..."
+             [(ngModel)]="searchQuery"
+             name="search"
+             style="margin-left:8px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
              (input)="onSearchInputChange()"
              [matAutocomplete]="auto" />
-      
+
       <mat-autocomplete #auto="matAutocomplete">
         <mat-option *ngFor="let item of filteredItems" [value]="item.name" (click)="selectItem(item)">
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -20,7 +20,7 @@
           </div>
         </mat-option>
       </mat-autocomplete>
-      
+
       <button mat-icon-button type="submit" aria-label="Search">
         <mat-icon>arrow_forward</mat-icon>
       </button>
@@ -38,7 +38,8 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <div class="category-items flex-row" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
-          <a *ngFor="let item of category.items" class="nav-link" [href]="item.url" rel="noopener" matRipple>
+          <a *ngFor="let item of category.items" class="nav-link" [href]="item.url" rel="noopener" matRipple
+          [matTooltip]="item.name + ' (' + item.url + ')'">
             <img src="{{getFaviconUrl(item)}}" alt="favicon" class="favicon" />
             <span title="{{ item.name }}">{{ item.name }}</span>
           </a>

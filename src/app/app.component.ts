@@ -9,8 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatRippleModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { Observable, of } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +23,8 @@ import { map, startWith } from 'rxjs/operators';
     MatButtonModule,
     MatInputModule,
     MatRippleModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatTooltipModule
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -54,13 +54,13 @@ export class AppComponent {
       this.filteredItems = [];
       return;
     }
-    
+
     const query = this.searchQuery.toLowerCase();
     const results: any[] = [];
-    
+
     this.navigation.categories.forEach(category => {
       category.items.forEach(item => {
-        if (item.name.toLowerCase().includes(query) || 
+        if (item.name.toLowerCase().includes(query) ||
             item.url.toLowerCase().includes(query)) {
           results.push({
             ...item,
@@ -69,7 +69,7 @@ export class AppComponent {
         }
       });
     });
-    
+
     this.filteredItems = results;
   }
 
