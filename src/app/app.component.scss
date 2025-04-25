@@ -237,3 +237,17 @@
   ::ng-deep .mat-expansion-panel-body {
     padding: 0 12px 12px !important;
   }
+
+  /* Back to top button styles */
+  .back-to-top-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+  }
+
+  .back-to-top-btn:hover {
+    opacity: 1;
+  }

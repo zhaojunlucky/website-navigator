@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import {NAVIGATION_DATA, NavigationData} from './navigation.config';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -32,14 +32,34 @@ import {HttpClient} from '@angular/common/http';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   navigation:NavigationData | null = null;
   searchQuery = '';
   filteredItems: any[] = [];
   navAPI = "http://localhost:8080/api/bookmark/collection/instances/2"
+  showBackToTopButton = false;
 
   constructor(private http: HttpClient) {
     this.loadNavigation();
+  }
+
+  ngOnInit() {
+    // Initial check for scroll position
+    this.checkScroll();
+  }
+
+  @HostListener('window:scroll', [])
+  checkScroll() {
+    // Show button when page is scrolled down more than 300px
+    this.showBackToTopButton = window.scrollY > 300;
+  }
+
+  scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    this.showBackToTopButton = false;
   }
 
   loadNavigation() {

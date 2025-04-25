@@ -36,7 +36,7 @@
     </mat-toolbar>
 
     <!-- Category Navigation -->
-    <div class="categories-container" style="margin-top: 1.5rem;">
+    <div class="categories-container">
       <mat-accordion multi>
         <mat-expansion-panel *ngFor="let category of navigation.categories; let i = index" [expanded]="i === 0">
           <mat-expansion-panel-header>
@@ -56,4 +56,15 @@
       </mat-accordion>
     </div>
   </ng-container>
+
+  <!-- Back to Top Button -->
+  <button
+    *ngIf="showBackToTopButton"
+    mat-fab
+    color="primary"
+    class="back-to-top-btn"
+    (click)="scrollToTop()"
+    matTooltip="Back to top">
+    <mat-icon>arrow_upward</mat-icon>
+  </button>
 </main>
