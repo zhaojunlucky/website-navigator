@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import {NAVIGATION_DATA, NavigationData, NavigationItem} from './navigation.config';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,7 +32,8 @@ import { environment } from '../environments/environment';
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatMenuModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    NgOptimizedImage
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']

@@ -70,7 +70,7 @@
           <div class="category-items flex-row" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
             <a *ngFor="let item of category.items" class="nav-link" [href]="item.content" rel="noopener" matRipple
                [matTooltip]="item.name + ' (' + item.content + ')'">
-              <img src="{{getFaviconUrl(item)}}" alt="favicon" class="favicon" />
+              <img ngSrc="{{getFaviconUrl(item)}}" alt="favicon" class="favicon" width="24" height="24"/>
               <span title="{{ item.name }}">{{ item.name }}</span>
             </a>
           </div>
