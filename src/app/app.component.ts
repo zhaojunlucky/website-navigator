@@ -43,6 +43,8 @@ export class AppComponent implements OnInit {
   filteredItems: any[] = [];
   navAPI = environment.navAPI;
   showBackToTopButton = false;
+  data : any = null
+  currentYear = new Date().getFullYear();
 
   constructor(private http: HttpClient, private snackBar: MatSnackBar) {
     this.loadNavigation();
@@ -70,9 +72,9 @@ export class AppComponent implements OnInit {
   loadNavigation() {
     let cache = localStorage.getItem('navigation')
     if (cache) {
-      let data = JSON.parse(cache);
-      this.navigation = data.data;
-      if (new Date().getTime() - data.time > 3600 * 4 * 1000) {
+      this.data = JSON.parse(cache);
+      this.navigation = this.data.data;
+      if (new Date().getTime() - this.data.time > 3600 * 4 * 1000) {
         this.refreshNavigation()
       }
       this.updateFilteredItems();
@@ -140,5 +142,16 @@ export class AppComponent implements OnInit {
 
   selectItem(item: NavigationItem) {
     window.location.href = item.content;
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.filteredItems = [];
+  }
+
+  protected readonly Date = Date;
+
+  getLastRefreshTime() {
+    return this.data ? 'Last refresh: ' + new Date(this.data.time).toLocaleString() : ''
   }
 }

@@ -262,3 +262,36 @@
   ::ng-deep .error-snackbar .mat-simple-snackbar-action {
     color: white;
   }
+
+  /* Footer styles */
+  .footer {
+    margin-top: auto;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .footer-left, .footer-right {
+    font-size: 0.875rem;
+    color: var(--gray-700);
+  }
+
+  .footer-left p, .footer-right p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: 600px) {
+    .footer-content {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+  }

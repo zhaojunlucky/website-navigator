@@ -11,13 +11,22 @@
     <mat-toolbar  class="mat-elevation-z2">
       <!-- Removed search icon -->
       <form (submit)="onSearch(); $event.preventDefault();" style="flex:1; display:flex; align-items:center;">
-        <input matInput
-               placeholder="Search the web..."
-               [(ngModel)]="searchQuery"
-               name="search"
-               style="margin-left:2px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
-               (input)="onSearchInputChange()"
-               [matAutocomplete]="auto" />
+        <div style="position: relative; flex: 1; display: flex; align-items: center;">
+          <input matInput
+                 placeholder="Search the web..."
+                 [(ngModel)]="searchQuery"
+                 name="search"
+                 style="margin-left:2px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
+                 (input)="onSearchInputChange()"
+                 [matAutocomplete]="auto" />
+          <button *ngIf="searchQuery"
+                  mat-icon-button
+                  type="button"
+                  style="position: absolute; right: 8px;"
+                  (click)="clearSearch()">
+            <mat-icon>clear</mat-icon>
+          </button>
+        </div>
 
         <mat-autocomplete #auto="matAutocomplete">
           <mat-option *ngFor="let item of filteredItems" [value]="item.name" (click)="selectItem(item)">
@@ -40,9 +49,9 @@
 
         <!-- Menu -->
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="refreshNavigation()">
+          <button mat-menu-item (click)="refreshNavigation()" [matTooltip]="getLastRefreshTime()">
             <mat-icon>refresh</mat-icon>
-            <span>Refresh Navigation</span>
+            <span>Refresh</span>
           </button>
         </mat-menu>
       </form>
@@ -69,6 +78,18 @@
       </mat-accordion>
     </div>
   </ng-container>
+
+  <!-- Footer -->
+  <footer *ngIf="navigation !== null" class="footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <p>&copy; 2025-{{ currentYear }} Website Navigator By <a href="https://gundamz.dev/url-bookmark">Jun</a></p>
+      </div>
+      <div class="footer-right">
+        <p>{{ getLastRefreshTime() }}</p>
+      </div>
+    </div>
+  </footer>
 
   <!-- Back to Top Button -->
   <button
