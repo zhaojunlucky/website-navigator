@@ -13,7 +13,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -40,7 +41,7 @@ export class AppComponent implements OnInit {
   navigation:NavigationData | null = null;
   searchQuery = '';
   filteredItems: any[] = [];
-  navAPI = "https://api.gundamz.dev/api/bookmark/collection/instances/2"
+  navAPI = environment.navAPI;
   showBackToTopButton = false;
 
   constructor(private http: HttpClient, private snackBar: MatSnackBar) {
@@ -106,7 +107,7 @@ export class AppComponent implements OnInit {
   }
 
   getFaviconUrl(item: NavigationItem) {
-    return item.favicon || `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.content}&size=32`;
+    return item.favicon || `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.content}&size=64`;
   }
 
   updateFilteredItems() {

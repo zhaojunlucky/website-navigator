@@ -15,7 +15,7 @@
                placeholder="Search the web..."
                [(ngModel)]="searchQuery"
                name="search"
-               style="margin-left:8px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
+               style="margin-left:2px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
                (input)="onSearchInputChange()"
                [matAutocomplete]="auto" />
 
@@ -32,12 +32,12 @@
         <button mat-icon-button type="submit" aria-label="Search">
           <mat-icon>arrow_forward</mat-icon>
         </button>
-        
+
         <!-- Menu Button -->
         <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu">
           <mat-icon>more_vert</mat-icon>
         </button>
-        
+
         <!-- Menu -->
         <mat-menu #menu="matMenu">
           <button mat-menu-item (click)="refreshNavigation()">
