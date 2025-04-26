@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import {NAVIGATION_DATA, NavigationData} from './navigation.config';
+import {NAVIGATION_DATA, NavigationData, NavigationItem} from './navigation.config';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -11,6 +11,8 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import {HttpClient} from '@angular/common/http';
 
 @Component({
@@ -27,7 +29,9 @@ import {HttpClient} from '@angular/common/http';
     MatRippleModule,
     MatAutocompleteModule,
     MatTooltipModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatMenuModule,
+    MatSnackBarModule
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -36,10 +40,10 @@ export class AppComponent implements OnInit {
   navigation:NavigationData | null = null;
   searchQuery = '';
   filteredItems: any[] = [];
-  navAPI = "http://localhost:8080/api/bookmark/collection/instances/2"
+  navAPI = "https://api.gundamz.dev/api/bookmark/collection/instances/2"
   showBackToTopButton = false;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private snackBar: MatSnackBar) {
     this.loadNavigation();
   }
 
@@ -78,11 +82,19 @@ export class AppComponent implements OnInit {
   }
 
   refreshNavigation() {
-    this.http.get(this.navAPI).subscribe((data: any) => {
-      this.navigation = data;
-      localStorage.setItem('navigation', JSON.stringify({data: this.navigation, time: new Date().getTime()}));
-      this.updateFilteredItems();
-
+    this.http.get<NavigationData>(this.navAPI).subscribe({
+      next: (data) => {
+        this.navigation = data;
+        localStorage.setItem('navigation', JSON.stringify({data: data, time: new Date().getTime()}));
+        this.updateFilteredItems();
+      },
+      error: (error) => {
+        console.error('Error fetching navigation data:', error);
+        this.snackBar.open(`Error refreshing navigation data: ${error.message || JSON.stringify(error)}`, 'Dismiss', {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        });
+      }
     })
   }
 
@@ -93,8 +105,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-  getFaviconUrl(item: any) {
-    return item.favicon || `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.url}&size=32`;
+  getFaviconUrl(item: NavigationItem) {
+    return item.favicon || `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.content}&size=32`;
   }
 
   updateFilteredItems() {
@@ -125,7 +137,7 @@ export class AppComponent implements OnInit {
     this.updateFilteredItems();
   }
 
-  selectItem(item: any) {
-    window.location.href = item.url;
+  selectItem(item: NavigationItem) {
+    window.location.href = item.content;
   }
 }

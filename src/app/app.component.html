@@ -32,6 +32,19 @@
         <button mat-icon-button type="submit" aria-label="Search">
           <mat-icon>arrow_forward</mat-icon>
         </button>
+        
+        <!-- Menu Button -->
+        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        
+        <!-- Menu -->
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="refreshNavigation()">
+            <mat-icon>refresh</mat-icon>
+            <span>Refresh Navigation</span>
+          </button>
+        </mat-menu>
       </form>
     </mat-toolbar>
 

@@ -47,7 +47,7 @@ export const NAVIGATION_DATA = {
           url: "https://gemini.google.com",
         },
         {
-          name: "特供 - HIFI",
+          name: "特供 - HIFINI",
           url: "https://hifini.com/forum-17.htm",
           favicon: "https://hifini.com/favicon.ico"
         },
@@ -98,16 +98,18 @@ export const NAVIGATION_DATA = {
   ]
 };
 
+export interface NavigationItem {
+  name: string;
+  content: string;
+  favicon?: string;
+}
 
+export interface NavigationCategory {
+  name: string;
+  icon?: string;
+  items: [NavigationItem];
+}
 export interface NavigationData {
   searchEngine: string;
-  categories: {
-    name: string;
-    icon?: string;
-    items: {
-      name: string;
-      content: string;
-      favicon?: string;
-    }[];
-  }[];
+  categories: [NavigationCategory];
 }
