@@ -193,6 +193,12 @@
     margin-right: 0.5rem;
   }
 
+  @media screen  {
+    .mat-icon {
+      margin-right: 0;
+    }
+  }
+
   .favicon {
     width: 24px;
     height: 24px;
@@ -246,11 +252,11 @@
       text-align: left;
       padding: 0.5rem 0.75rem;
     }
-    
+
     .nav-link .favicon {
       margin-right: 0.5rem;
     }
-    
+
     .nav-link span {
       margin-top: 0;
       max-width: 120px;
@@ -281,7 +287,7 @@
     background-color: #f44336;
     color: white;
   }
-  
+
   ::ng-deep .error-snackbar .mat-simple-snackbar-action {
     color: white;
   }

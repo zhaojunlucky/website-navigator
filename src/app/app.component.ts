@@ -89,7 +89,8 @@ export class AppComponent implements OnInit {
     this.http.get<NavigationData>(this.navAPI).subscribe({
       next: (data) => {
         this.navigation = data;
-        localStorage.setItem('navigation', JSON.stringify({data: data, time: new Date().getTime()}));
+        this.data = {data: data, time: new Date().getTime()}
+        localStorage.setItem('navigation', JSON.stringify(this.data));
         this.updateFilteredItems();
       },
       error: (error) => {
