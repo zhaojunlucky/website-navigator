@@ -111,7 +111,7 @@ export class AppComponent implements OnInit {
   }
 
   getFaviconUrl(item: NavigationItem) {
-    return item.favicon || `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.content}&size=64`;
+    return item.icon || `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.content}&size=64`;
   }
 
   updateFilteredItems() {

@@ -101,7 +101,7 @@ export const NAVIGATION_DATA = {
 export interface NavigationItem {
   name: string;
   content: string;
-  favicon?: string;
+  icon?: string;
 }
 
 export interface NavigationCategory {
