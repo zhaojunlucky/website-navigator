@@ -31,7 +31,7 @@
         <mat-autocomplete #auto="matAutocomplete">
           <mat-option *ngFor="let item of filteredItems" [value]="item.name" (click)="selectItem(item)">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <img [src]="getFaviconUrl(item)" alt="favicon" style="width: 16px; height: 16px;" />
+              <img [ngSrc]="getFaviconUrl(item)" alt="favicon" width="16" height="16" />
               <span>{{ item.name }}</span>
               <span style="color: #777; font-size: 0.8em; margin-left: auto;">{{ item.category }}</span>
             </div>
