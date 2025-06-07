@@ -62,6 +62,7 @@
     box-sizing: border-box;
     position: relative;
     overflow-x: hidden;
+    contain: content;
   }
 
   .angular-logo {
@@ -157,7 +158,9 @@
   @media screen and (max-width: 650px) {
     .content {
       flex-direction: column;
-      width: max-content;
+      width: 100%;
+      max-width: 100%;
+      padding: 0 1rem;
     }
 
     .divider {
@@ -193,7 +196,7 @@
     margin-right: 0.5rem;
   }
 
-  @media screen  {
+  @media screen and (max-width: 480px) {
     .mat-icon {
       margin-right: 0;
     }
@@ -222,7 +225,9 @@
     justify-content: center;
     text-align: center;
     background-color: #f5f5f5;
+    will-change: background-color;
     transition: background-color 0.2s ease;
+    contain: content;
   }
 
   .nav-link span {
@@ -243,6 +248,7 @@
     color: white;
   }
 
+  /* Mobile-first approach */
   @media screen and (min-width: 768px) {
     .nav-link {
       width: 180px;
@@ -264,7 +270,7 @@
   }
 
   /* Reduce expansion panel body padding */
-  ::ng-deep .mat-expansion-panel-body {
+  :host ::ng-deep .mat-expansion-panel-body {
     padding: 0 12px 12px !important;
   }
 
@@ -275,7 +281,9 @@
     right: 20px;
     z-index: 999;
     opacity: 0.9;
-    transition: opacity 0.3s ease;
+    will-change: opacity;
+    transition: opacity 0.2s ease;
+    contain: layout style;
   }
 
   .back-to-top-btn:hover {
@@ -283,12 +291,12 @@
   }
 
   /* Snackbar styles */
-  ::ng-deep .error-snackbar {
+  :host ::ng-deep .error-snackbar {
     background-color: #f44336;
     color: white;
   }
 
-  ::ng-deep .error-snackbar .mat-simple-snackbar-action {
+  :host ::ng-deep .error-snackbar .mat-simple-snackbar-action {
     color: white;
   }
 

@@ -1,6 +1,7 @@
-import { Component, HostListener, OnInit } from '@angular/core';
-import {NAVIGATION_DATA, NavigationData, NavigationItem} from './navigation.config';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import { Component, HostListener, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { NavigationData, NavigationItem } from './navigation.config';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -47,7 +48,11 @@ export class AppComponent implements OnInit {
   data : any = null
   currentYear = new Date().getFullYear();
 
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) {
+  constructor(
+    private http: HttpClient, 
+    private snackBar: MatSnackBar,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     this.loadNavigation();
   }
 
@@ -59,29 +64,46 @@ export class AppComponent implements OnInit {
   @HostListener('window:scroll', [])
   checkScroll() {
     // Show button when page is scrolled down more than 300px
-    this.showBackToTopButton = window.scrollY > 300;
+    if (isPlatformBrowser(this.platformId)) {
+      this.showBackToTopButton = window.scrollY > 300;
+    }
   }
 
   scrollToTop() {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-    this.showBackToTopButton = false;
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      this.showBackToTopButton = false;
+    }
   }
 
   loadNavigation() {
-    let cache = localStorage.getItem('navigation')
-    if (cache) {
-      this.data = JSON.parse(cache);
-      this.navigation = this.data.data;
-      if (new Date().getTime() - this.data.time > 3600 * 4 * 1000) {
+    if (isPlatformBrowser(this.platformId)) {
+      let cache = localStorage.getItem('navigation')
+      if (cache) {
+        try {
+          this.data = JSON.parse(cache);
+          this.navigation = this.data.data;
+          if (new Date().getTime() - this.data.time > 3600 * 4 * 1000) {
+            this.refreshNavigation()
+          }
+          this.updateFilteredItems();
+        } catch (e) {
+          console.error('Error parsing navigation cache:', e);
+          this.refreshNavigation();
+        }
+      } else {
         this.refreshNavigation()
       }
-      this.updateFilteredItems();
-
     } else {
-      this.refreshNavigation()
+      // Server-side rendering case - use empty navigation structure
+      this.navigation = {
+        searchEngine: "https://www.google.com/search?q=[VEDA]",
+        categories: []
+      };
+      this.updateFilteredItems();
     }
   }
 
@@ -89,12 +111,26 @@ export class AppComponent implements OnInit {
     this.http.get<NavigationData>(this.navAPI).subscribe({
       next: (data) => {
         this.navigation = data;
-        this.data = {data: data, time: new Date().getTime()}
-        localStorage.setItem('navigation', JSON.stringify(this.data));
+        if (isPlatformBrowser(this.platformId)) {
+          this.data = {data: data, time: new Date().getTime()}
+          try {
+            localStorage.setItem('navigation', JSON.stringify(this.data));
+          } catch (e) {
+            console.error('Error saving navigation to localStorage:', e);
+          }
+        }
         this.updateFilteredItems();
       },
       error: (error) => {
         console.error('Error fetching navigation data:', error);
+        // Fallback to empty navigation if API fails
+        if (!this.navigation) {
+          this.navigation = {
+            searchEngine: "https://www.google.com/search?q=[VEDA]",
+            categories: []
+          };
+          this.updateFilteredItems();
+        }
         this.snackBar.open(`Error refreshing navigation data: ${error.message || JSON.stringify(error)}`, 'Dismiss', {
           duration: 5000,
           panelClass: ['error-snackbar']
@@ -104,14 +140,18 @@ export class AppComponent implements OnInit {
   }
 
   onSearch() {
-    if (this.searchQuery.trim() && this.navigation !== null) {
+    if (this.searchQuery.trim() && this.navigation !== null && isPlatformBrowser(this.platformId)) {
       const url = this.navigation.searchEngine.replace('[VEDA]', encodeURIComponent(this.searchQuery));
       window.location.href = url;
     }
   }
 
   getFaviconUrl(item: NavigationItem) {
-    return item.icon || `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.content}&size=64`;
+    if (item.favicon) return item.favicon;
+    if (item.icon) return item.icon;
+    
+    const url = item.content || item.url || '';
+    return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`;
   }
 
   updateFilteredItems() {
@@ -125,8 +165,9 @@ export class AppComponent implements OnInit {
 
     this.navigation.categories.forEach(category => {
       category.items.forEach(item => {
+        const itemUrl = (item.content || item.url || '').toLowerCase();
         if (item.name.toLowerCase().includes(query) ||
-            item.content.toLowerCase().includes(query)) {
+            itemUrl.includes(query)) {
           results.push({
             ...item,
             category: category.name
@@ -143,7 +184,12 @@ export class AppComponent implements OnInit {
   }
 
   selectItem(item: NavigationItem) {
-    window.location.href = item.content;
+    if (isPlatformBrowser(this.platformId)) {
+      const url = item.content || item.url || '';
+      if (url) {
+        window.location.href = url;
+      }
+    }
   }
 
   clearSearch() {
@@ -155,5 +201,18 @@ export class AppComponent implements OnInit {
 
   getLastRefreshTime() {
     return this.data ? 'Last refresh: ' + new Date(this.data.time).toLocaleString() : ''
+  }
+  
+  // TrackBy functions for better rendering performance
+  trackByCategory(index: number, category: any) {
+    return category.name;
+  }
+  
+  trackByItem(index: number, item: any) {
+    return item.name;
+  }
+  
+  trackByFilteredItem(index: number, item: any) {
+    return item.name;
   }
 }

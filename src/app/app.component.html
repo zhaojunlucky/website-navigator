@@ -1,8 +1,8 @@
 <main class="main" style="flex-direction: column; align-items: stretch;">
   <!-- Loading Layer -->
   <div *ngIf="navigation === null" class="loading-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%;">
-    <mat-spinner diameter="50"></mat-spinner>
-    <p style="margin-top: 20px; font-size: 18px; color: #555;">Loading navigation data...</p>
+    <mat-spinner diameter="40"></mat-spinner>
+    <p style="margin-top: 20px; font-size: 16px; color: #555;">Loading navigation data...</p>
   </div>
 
   <!-- Main Content - Only shown when navigation is loaded -->
@@ -29,9 +29,9 @@
         </div>
 
         <mat-autocomplete #auto="matAutocomplete">
-          <mat-option *ngFor="let item of filteredItems" [value]="item.name" (click)="selectItem(item)">
+          <mat-option *ngFor="let item of filteredItems; trackBy: trackByFilteredItem" [value]="item.name" (click)="selectItem(item)">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <img [ngSrc]="getFaviconUrl(item)" alt="favicon" width="16" height="16" />
+              <img [ngSrc]="getFaviconUrl(item)" alt="favicon" width="16" height="16" loading="lazy" />
               <span>{{ item.name }}</span>
               <span style="color: #777; font-size: 0.8em; margin-left: auto;">{{ item.category }}</span>
             </div>
@@ -60,7 +60,9 @@
     <!-- Category Navigation -->
     <div class="categories-container">
       <mat-accordion multi>
-        <mat-expansion-panel *ngFor="let category of navigation.categories; let i = index" [expanded]="i === 0">
+        <mat-expansion-panel 
+          *ngFor="let category of navigation.categories; let i = index; trackBy: trackByCategory" 
+          [expanded]="i === 0">
           <mat-expansion-panel-header>
             <mat-panel-title>
               <mat-icon>{{ category.icon || "folder" }}</mat-icon>
@@ -68,9 +70,20 @@
             </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="category-items flex-row" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
-            <a *ngFor="let item of category.items" class="nav-link" [href]="item.content" rel="noopener" matRipple
-               [matTooltip]="item.name + ' (' + item.content + ')'">
-              <img ngSrc="{{getFaviconUrl(item)}}" alt="favicon" class="favicon" width="24" height="24"/>
+            <a *ngFor="let item of category.items; trackBy: trackByItem" 
+               class="nav-link" 
+               [href]="item.content || item.url" 
+               rel="noopener" 
+               matRipple
+               [matTooltip]="item.name + ' (' + (item.content || item.url) + ')'">
+              <img 
+                ngSrc="{{getFaviconUrl(item)}}" 
+                alt="favicon" 
+                class="favicon" 
+                width="24" 
+                height="24" 
+                loading="lazy" 
+                fetchpriority="low"/>
               <span title="{{ item.name }}">{{ item.name }}</span>
             </a>
           </div>
