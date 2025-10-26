@@ -332,3 +332,45 @@
       text-align: center;
     }
   }
+
+  /* Dark mode styles */
+  :host-context(.dark-theme) {
+    h1 {
+      color: #e0e0e0;
+    }
+
+    p {
+      color: #b0b0b0;
+    }
+
+    .nav-link {
+      color: #e0e0e0;
+      background-color: #2c2c2c;
+    }
+
+    .nav-link:hover {
+      background-color: #3c3c3c;
+    }
+
+    .nav-link:active {
+      background-color: #4c4c4c;
+      color: white;
+    }
+
+    .footer {
+      background-color: #1e1e1e;
+      border-top: 1px solid #333;
+    }
+
+    .footer-left, .footer-right {
+      color: #b0b0b0;
+    }
+
+    .social-links path {
+      fill: #b0b0b0;
+    }
+
+    .social-links a:hover svg path {
+      fill: #e0e0e0;
+    }
+  }

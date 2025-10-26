@@ -1,4 +1,54 @@
 /* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
 
-html, body { height: 100%; width: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+// Include the common styles for Angular Material
+@include mat.core();
+
+// Define the light theme
+$light-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+  ),
+));
+
+// Define the dark theme
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$azure-palette,
+  ),
+));
+
+// Apply the light theme by default
+:root {
+  @include mat.all-component-themes($light-theme);
+}
+
+// Apply the dark theme when the dark-theme class is present
+.dark-theme {
+  @include mat.all-component-colors($dark-theme);
+}
+
+html, body { 
+  height: 100%; 
+  width: 100%; 
+  background-color: #fafafa;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+body { 
+  margin: 0; 
+  font-family: Roboto, "Helvetica Neue", sans-serif; 
+}
+
+// Dark mode background and text colors
+.dark-theme {
+  background-color: #121212;
+  color: rgba(255, 255, 255, 0.87);
+  
+  html, body {
+    background-color: #121212;
+    color: rgba(255, 255, 255, 0.87);
+  }
+}

@@ -46,6 +46,7 @@ export class AppComponent implements OnInit {
   showBackToTopButton = false;
   data : any = null
   currentYear = new Date().getFullYear();
+  isDarkMode = false;
 
   constructor(
     private http: HttpClient, 
@@ -58,6 +59,34 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     // Initial check for scroll position
     this.checkScroll();
+    // Initialize dark mode detection
+    this.initializeDarkMode();
+  }
+
+  initializeDarkMode() {
+    if (isPlatformBrowser(this.platformId)) {
+      // Check if browser prefers dark mode
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+      this.isDarkMode = prefersDark.matches;
+      this.applyTheme();
+
+      // Listen for changes in color scheme preference
+      prefersDark.addEventListener('change', (e) => {
+        this.isDarkMode = e.matches;
+        this.applyTheme();
+      });
+    }
+  }
+
+  applyTheme() {
+    if (isPlatformBrowser(this.platformId)) {
+      const body = document.body;
+      if (this.isDarkMode) {
+        body.classList.add('dark-theme');
+      } else {
+        body.classList.remove('dark-theme');
+      }
+    }
   }
 
   @HostListener('window:scroll', [])
