@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NavigationData, NavigationItem } from './navigation.config';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,7 +21,6 @@ import { environment } from '../environments/environment';
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatToolbarModule,
     MatIconModule,
@@ -35,7 +34,7 @@ import { environment } from '../environments/environment';
     MatMenuModule,
     MatSnackBarModule,
     NgOptimizedImage
-  ],
+],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

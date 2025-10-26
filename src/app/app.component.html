@@ -1,52 +1,54 @@
 <main class="main" style="flex-direction: column; align-items: stretch;">
   <!-- Loading Layer -->
-  <div *ngIf="navigation === null" class="loading-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%;">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p style="margin-top: 20px; font-size: 16px; color: #555;">Loading navigation data...</p>
-  </div>
+  @if (navigation === null) {
+    <div class="loading-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%;">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p style="margin-top: 20px; font-size: 16px; color: #555;">Loading navigation data...</p>
+    </div>
+  }
 
   <!-- Main Content - Only shown when navigation is loaded -->
-  <ng-container *ngIf="navigation !== null">
+  @if (navigation !== null) {
     <!-- Top Navigation Search Bar -->
     <mat-toolbar  class="mat-elevation-z2">
       <!-- Removed search icon -->
       <form (submit)="onSearch(); $event.preventDefault();" style="flex:1; display:flex; align-items:center;">
         <div style="position: relative; flex: 1; display: flex; align-items: center;">
           <input matInput
-                 placeholder="Search the web..."
-                 [(ngModel)]="searchQuery"
-                 name="search"
-                 style="margin-left:2px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
-                 (input)="onSearchInputChange()"
-                 [matAutocomplete]="auto" />
-          <button *ngIf="searchQuery"
-                  mat-icon-button
-                  type="button"
-                  style="position: absolute; right: 8px;"
-                  (click)="clearSearch()">
-            <mat-icon>clear</mat-icon>
-          </button>
+            placeholder="Search the web..."
+            [(ngModel)]="searchQuery"
+            name="search"
+            style="margin-left:2px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
+            (input)="onSearchInputChange()"
+            [matAutocomplete]="auto" />
+          @if (searchQuery) {
+            <button
+              mat-icon-button
+              type="button"
+              style="position: absolute; right: 8px;"
+              (click)="clearSearch()">
+              <mat-icon>clear</mat-icon>
+            </button>
+          }
         </div>
-
         <mat-autocomplete #auto="matAutocomplete">
-          <mat-option *ngFor="let item of filteredItems; trackBy: trackByFilteredItem" [value]="item.name" (click)="selectItem(item)">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <img [ngSrc]="getFaviconUrl(item)" alt="favicon" width="16" height="16" loading="lazy" />
-              <span>{{ item.name }}</span>
-              <span style="color: #777; font-size: 0.8em; margin-left: auto;">{{ item.category }}</span>
-            </div>
-          </mat-option>
+          @for (item of filteredItems; track trackByFilteredItem($index, item)) {
+            <mat-option [value]="item.name" (click)="selectItem(item)">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img [ngSrc]="getFaviconUrl(item)" alt="favicon" width="16" height="16" loading="lazy" />
+                <span>{{ item.name }}</span>
+                <span style="color: #777; font-size: 0.8em; margin-left: auto;">{{ item.category }}</span>
+              </div>
+            </mat-option>
+          }
         </mat-autocomplete>
-
         <button mat-icon-button type="submit" aria-label="Search">
           <mat-icon>arrow_forward</mat-icon>
         </button>
-
         <!-- Menu Button -->
         <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu">
           <mat-icon>more_vert</mat-icon>
         </button>
-
         <!-- Menu -->
         <mat-menu #menu="matMenu">
           <button mat-menu-item (click)="refreshNavigation()">
@@ -56,62 +58,67 @@
         </mat-menu>
       </form>
     </mat-toolbar>
-
     <!-- Category Navigation -->
     <div class="categories-container">
       <mat-accordion multi>
-        <mat-expansion-panel 
-          *ngFor="let category of navigation.categories; let i = index; trackBy: trackByCategory" 
-          [expanded]="i === 0">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon>{{ category.icon || "folder" }}</mat-icon>
-              {{ category.name }}
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div class="category-items flex-row" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
-            <a *ngFor="let item of category.items; trackBy: trackByItem" 
-               class="nav-link" 
-               [href]="item.content || item.url" 
-               rel="noopener" 
-               matRipple
-               [matTooltip]="item.name + ' (' + (item.content || item.url) + ')'">
-              <img 
-                ngSrc="{{getFaviconUrl(item)}}" 
-                alt="favicon" 
-                class="favicon" 
-                width="24" 
-                height="24" 
-                loading="lazy" 
-                fetchpriority="low"/>
-              <span title="{{ item.name }}">{{ item.name }}</span>
-            </a>
-          </div>
-        </mat-expansion-panel>
+        @for (category of navigation.categories; track trackByCategory(i, category); let i = $index) {
+          <mat-expansion-panel
+            [expanded]="i === 0">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>{{ category.icon || "folder" }}</mat-icon>
+                {{ category.name }}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="category-items flex-row" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
+              @for (item of category.items; track trackByItem($index, item)) {
+                <a
+                  class="nav-link"
+                  [href]="item.content || item.url"
+                  rel="noopener"
+                  matRipple
+                  [matTooltip]="item.name + ' (' + (item.content || item.url) + ')'">
+                  <img
+                    ngSrc="{{getFaviconUrl(item)}}"
+                    alt="favicon"
+                    class="favicon"
+                    width="24"
+                    height="24"
+                    loading="lazy"
+                    fetchpriority="low"/>
+                  <span title="{{ item.name }}">{{ item.name }}</span>
+                </a>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
       </mat-accordion>
     </div>
-  </ng-container>
+  }
 
   <!-- Footer -->
-  <footer *ngIf="navigation !== null" class="footer">
-    <div class="footer-content">
-      <div class="footer-left">
-        <p>&copy; 2025-{{ currentYear }} Website Navigator By <a href="https://gundamz.dev/url-bookmark">Jun</a></p>
+  @if (navigation !== null) {
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <p>&copy; 2025-{{ currentYear }} Website Navigator By <a href="https://gundamz.dev/url-bookmark">Jun</a></p>
+        </div>
+        <div class="footer-right">
+          <p>{{ getLastRefreshTime() }}</p>
+        </div>
       </div>
-      <div class="footer-right">
-        <p>{{ getLastRefreshTime() }}</p>
-      </div>
-    </div>
-  </footer>
+    </footer>
+  }
 
   <!-- Back to Top Button -->
-  <button
-    *ngIf="showBackToTopButton"
-    mat-fab
-    color="primary"
-    class="back-to-top-btn"
-    (click)="scrollToTop()"
-    matTooltip="Back to top">
-    <mat-icon>arrow_upward</mat-icon>
-  </button>
+  @if (showBackToTopButton) {
+    <button
+      mat-fab
+      color="primary"
+      class="back-to-top-btn"
+      (click)="scrollToTop()"
+      matTooltip="Back to top">
+      <mat-icon>arrow_upward</mat-icon>
+    </button>
+  }
 </main>
