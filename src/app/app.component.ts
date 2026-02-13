@@ -45,11 +45,10 @@ export class AppComponent implements OnInit {
   navAPI = environment.navAPI;
   showBackToTopButton = false;
   data : any = null
-  currentYear = new Date().getFullYear();
   isDarkMode = false;
 
   constructor(
-    private http: HttpClient, 
+    private http: HttpClient,
     private snackBar: MatSnackBar,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
@@ -177,7 +176,7 @@ export class AppComponent implements OnInit {
   getFaviconUrl(item: NavigationItem) {
     if (item.favicon) return item.favicon;
     if (item.icon) return item.icon;
-    
+
     const url = item.content || item.url || '';
     return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`;
   }
@@ -230,16 +229,16 @@ export class AppComponent implements OnInit {
   getLastRefreshTime() {
     return this.data ? 'Last refresh: ' + new Date(this.data.time).toLocaleString() : ''
   }
-  
+
   // TrackBy functions for better rendering performance
   trackByCategory(index: number, category: any) {
     return category.name;
   }
-  
+
   trackByItem(index: number, item: any) {
     return item.name;
   }
-  
+
   trackByFilteredItem(index: number, item: any) {
     return item.name;
   }

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  navAPI: 'https://api.gundamz.dev/api/bookmark/collection/instances/2'
+  navAPI: 'https://api.exia.app/api/bookmark/collection/instances/2'
 };
