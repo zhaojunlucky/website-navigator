@@ -60,7 +60,7 @@
     </mat-toolbar>
     <!-- Category Navigation -->
     <div class="categories-container">
-      <mat-accordion multi>
+      <mat-accordion>
         @for (category of navigation.categories; track trackByCategory(i, category); let i = $index) {
           <mat-expansion-panel
             [expanded]="i === 0">
@@ -101,7 +101,7 @@
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-left">
-          <p>&copy; 2025-2026 Website Navigator By <a href="https://gundamz.dev/url-bookmark">Jun</a></p>
+          <p>&copy; 2025-2026 Website Navigator By <a href="https://exia.app/url-bookmark">Jun</a></p>
         </div>
         <div class="footer-right">
           <p>{{ getLastRefreshTime() }}</p>
