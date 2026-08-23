@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, HostListener, OnInit, PLATFORM_ID, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NavigationData, NavigationItem } from './navigation.config';
 import { NgOptimizedImage } from '@angular/common';
@@ -36,6 +36,7 @@ import { environment } from '../environments/environment';
     NgOptimizedImage
 ],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {

@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  navAPI: 'http://10.53.1.32:8080/api/bookmark/collection/instances/2'
+  navAPI: 'http://localhost:8080/api/bookmark/collection/instances/2'
 };
 
 /*
