@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bookmark Card Prototype</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface-2: #f1f3f8;
+      --text: #20242b;
+      --muted: #687181;
+      --line: #dfe3eb;
+      --line-strong: #c4cad5;
+      --accent: #2563eb;
+      --accent-soft: #e8f0ff;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 8px 24px rgba(15, 23, 42, 0.06);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(246, 247, 251, 0.92);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    .search-wrap {
+      position: relative;
+      min-width: 0;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 44px 0 16px;
+      font-size: 18px;
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .icon-button {
+      width: 40px;
+      height: 40px;
+      display: inline-grid;
+      place-items: center;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #343a45;
+      cursor: pointer;
+    }
+
+    .icon-button:hover,
+    .icon-button:focus-visible {
+      background: var(--surface-2);
+      outline: none;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 4px;
+      top: 4px;
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      display: block;
+      fill: currentColor;
+    }
+
+    .content {
+      padding: 16px 0 40px;
+    }
+
+    .accordion {
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .section + .section {
+      border-top: 1px solid var(--line);
+    }
+
+    .section-header {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      background: var(--surface);
+      color: var(--text);
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 0 22px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .section-header:hover,
+    .section-header:focus-visible {
+      background: #fafbfe;
+      outline: none;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .section-title span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .count {
+      min-width: 28px;
+      height: 22px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chevron {
+      transition: transform 160ms ease;
+    }
+
+    .section[data-open="true"] .chevron {
+      transform: rotate(180deg);
+    }
+
+    .section-body {
+      display: none;
+      padding: 0 12px 12px;
+      background: linear-gradient(#fbfcff, #f8f9fd);
+    }
+
+    .section[data-open="true"] .section-body {
+      display: block;
+    }
+
+    .bookmark-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+      gap: 10px;
+      max-width: 1920px;
+    }
+
+    .bookmark-card {
+      position: relative;
+      height: 104px;
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 46px 20px;
+      justify-items: center;
+      align-content: center;
+      gap: 8px;
+      padding: 12px 10px 10px;
+      border: 1px solid #edf0f5;
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+      transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .bookmark-card:hover,
+    .bookmark-card:focus-visible {
+      border-color: #b9c7f8;
+      background: #fcfdff;
+      box-shadow: var(--shadow);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .favicon-shell {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #eef1f6;
+      border-radius: 8px;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+
+    .favicon-shell img {
+      width: 32px;
+      height: 32px;
+      display: block;
+      object-fit: contain;
+    }
+
+    .favicon-shell[data-fallback="true"] {
+      color: white;
+      border: 0;
+      background: var(--brand, #64748b);
+      font-weight: 800;
+      font-size: 17px;
+    }
+
+    .bookmark-name {
+      width: 100%;
+      color: #242933;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 20px;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .quick-actions {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      display: flex;
+      gap: 2px;
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .bookmark-card:hover .quick-actions,
+    .bookmark-card:focus-within .quick-actions {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mini-button {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--muted);
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+    }
+
+    .mini-button:hover,
+    .mini-button:focus-visible {
+      color: var(--accent);
+      border-color: #b9c7f8;
+      outline: none;
+    }
+
+    .empty {
+      display: none;
+      padding: 72px 24px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .app[data-empty="true"] .empty {
+      display: block;
+    }
+
+    .app[data-empty="true"] .accordion {
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        grid-template-columns: 1fr auto;
+        padding: 8px;
+      }
+
+      .topbar > .icon-button:last-child {
+        display: none;
+      }
+
+      .search-input {
+        height: 44px;
+        font-size: 16px;
+      }
+
+      .section-header {
+        padding: 0 14px;
+      }
+
+      .section-body {
+        padding: 0 8px 10px;
+      }
+
+      .bookmark-grid {
+        grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+        gap: 8px;
+      }
+
+      .bookmark-card {
+        height: 96px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="search-wrap">
+        <input class="search-input" id="search" type="search" placeholder="Search the web..." autocomplete="off">
+        <button class="icon-button search-clear" id="clearSearch" type="button" aria-label="Clear search" title="Clear search">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.59 7.1 5.7a1 1 0 1 0-1.4 1.4l4.89 4.9-4.9 4.9a1 1 0 1 0 1.41 1.4l4.9-4.89 4.9 4.9a1 1 0 0 0 1.4-1.41L13.41 12l4.9-4.9a1 1 0 0 0 0-1.4Z"></path>
+          </svg>
+        </button>
+      </div>
+      <button class="icon-button" type="button" aria-label="Search" title="Search">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M13.3 5.3a1 1 0 0 1 1.4 0l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 1 1-1.4-1.4l4.29-4.3H4a1 1 0 1 1 0-2h13.59L13.3 6.7a1 1 0 0 1 0-1.4Z"></path>
+        </svg>
+      </button>
+      <button class="icon-button" type="button" aria-label="More options" title="More options">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <main class="content">
+      <div class="accordion" id="accordion"></div>
+      <div class="empty">No bookmarks match this search.</div>
+    </main>
+  </div>
+
+  <script>
+    const iconPaths = {
+      heart: "M12 21s-7.5-4.7-9.6-9.1C.8 8.5 2.7 5 6.2 5c2 0 3.5 1 4.3 2.2C11.3 6 12.8 5 14.8 5c3.5 0 5.4 3.5 3.8 6.9C16.5 16.3 12 21 12 21Z",
+      bookmark: "M6 3.5A2.5 2.5 0 0 1 8.5 1h7A2.5 2.5 0 0 1 18 3.5V21l-6-3.5L6 21V3.5Z",
+      folder: "M3 6.5A2.5 2.5 0 0 1 5.5 4H10l2 2h6.5A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-10Z",
+      users: "M8.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7-1a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 18.4C2 15.4 4.9 13 8.5 13s6.5 2.4 6.5 5.4V19H2v-.6Zm12.5-4.9c2.7.5 4.5 2.4 4.5 4.9V19h3v-.5c0-2.8-2.6-5-5.8-5-.6 0-1.2 0-1.7.1Z",
+      chevron: "M6.3 8.7a1 1 0 0 1 1.4 0l4.3 4.29 4.3-4.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1 0-1.41Z",
+      external: "M14 4a1 1 0 1 0 0 2h2.59l-7.3 7.3a1 1 0 0 0 1.42 1.4l7.29-7.29V10a1 1 0 1 0 2 0V5a1 1 0 0 0-1-1h-5ZM6 6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4a1 1 0 1 0-2 0v4H6V8h4a1 1 0 1 0 0-2H6Z",
+      copy: "M8 7a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-1v1a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3h1V7Zm2 1h3a3 3 0 0 1 3 3v3h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v1Zm-3 2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H7Z"
+    };
+
+    const data = [
+      {
+        name: "Favorite",
+        icon: "heart",
+        open: true,
+        items: [
+          { name: "Google", url: "https://google.com", brand: "#4285f4", image: logo("G", "#4285f4", "#34a853", "#fbbc05", "#ea4335") },
+          { name: "test", url: "https://example.com/test", brand: "#8b5cf6", initial: "M" },
+          { name: "cnbeta", url: "https://cnbeta.com", brand: "#1d7ed0", initial: "C" },
+          { name: "Bing", url: "https://bing.com", brand: "#008373", broken: true },
+          { name: "Libgen", url: "https://libgen.rs", brand: "#64748b", initial: "L" },
+          { name: "outlook", url: "https://outlook.live.com", brand: "#2563eb", initial: "O" },
+          { name: "hah", url: "https://example.com/hah", brand: "#8b5cf6", initial: "M" },
+          { name: "ss", url: "https://example.com/ss", brand: "#a855f7", initial: "S" },
+          { name: "zz", url: "https://example.com/zz", brand: "#2563eb", initial: "Z" },
+          { name: "baidu", url: "https://baidu.com", brand: "#2458ff", initial: "B" },
+          { name: "family", url: "https://example.com/family", brand: "#64748b", initial: "F" },
+          { name: "hhh", url: "https://example.com/hhh", brand: "#64748b", initial: "H" }
+        ]
+      },
+      {
+        name: "GitHub",
+        icon: "bookmark",
+        items: [
+          { name: "GitHub", url: "https://github.com", brand: "#111827", initial: "GH" },
+          { name: "Angular", url: "https://github.com/angular/angular", brand: "#dd0031", initial: "A" },
+          { name: "Material", url: "https://github.com/angular/components", brand: "#7c3aed", initial: "M" }
+        ]
+      },
+      {
+        name: "AI",
+        icon: "folder",
+        items: [
+          { name: "ChatGPT", url: "https://chatgpt.com", brand: "#10a37f", initial: "AI" },
+          { name: "Claude", url: "https://claude.ai", brand: "#b45309", initial: "C" },
+          { name: "Perplexity", url: "https://perplexity.ai", brand: "#0891b2", initial: "P" }
+        ]
+      },
+      {
+        name: "Social",
+        icon: "users",
+        items: [
+          { name: "X", url: "https://x.com", brand: "#111827", initial: "X" },
+          { name: "Reddit", url: "https://reddit.com", brand: "#ff4500", initial: "R" },
+          { name: "YouTube", url: "https://youtube.com", brand: "#dc2626", initial: "YT" }
+        ]
+      },
+      {
+        name: "Others",
+        icon: "folder",
+        items: [
+          { name: "Maps", url: "https://maps.google.com", brand: "#16a34a", initial: "M" },
+          { name: "Translate", url: "https://translate.google.com", brand: "#2563eb", initial: "T" }
+        ]
+      },
+      {
+        name: "Book",
+        icon: "bookmark",
+        items: [
+          { name: "MDN Web Docs", url: "https://developer.mozilla.org", brand: "#111827", initial: "MDN" },
+          { name: "Angular Docs", url: "https://angular.dev", brand: "#dd0031", initial: "A" }
+        ]
+      }
+    ];
+
+    const app = document.getElementById("app");
+    const accordion = document.getElementById("accordion");
+    const search = document.getElementById("search");
+    const clearSearch = document.getElementById("clearSearch");
+
+    function svgIcon(name, className = "icon") {
+      return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true"><path d="${iconPaths[name]}"></path></svg>`;
+    }
+
+    function logo(letter, c1, c2, c3, c4) {
+      return `data:image/svg+xml,${encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="28" fill="white"/>
+          <path fill="${c1}" d="M32 30h25c.3 2 .1 4.5-.7 7H32z"/>
+          <path fill="${c2}" d="M54 41C50 53 39 59 27 56 13 53 5 39 9 25l12 9c1 6 6 10 12 10 4 0 8-2 10-5z"/>
+          <path fill="${c3}" d="M9 25C12 12 25 4 38 8c4 1 8 3 11 6l-9 9c-2-2-5-3-8-3-5 0-10 3-12 8z"/>
+          <path fill="${c4}" d="M21 34 9 25c2-7 7-13 14-16l10 11c-6 0-11 6-12 14z"/>
+          <text x="32" y="39" text-anchor="middle" font-family="Arial" font-size="25" font-weight="800" fill="${c1}">${letter}</text>
+        </svg>
+      `)}`;
+    }
+
+    function makeFavicon(item) {
+      if (item.image && !item.broken) {
+        return `<span class="favicon-shell"><img src="${item.image}" alt="" loading="lazy"></span>`;
+      }
+
+      const label = item.initial || item.name.slice(0, 1).toUpperCase();
+      return `<span class="favicon-shell" data-fallback="true" style="--brand:${item.brand}">${label}</span>`;
+    }
+
+    function render() {
+      const q = search.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      accordion.innerHTML = data.map((section) => {
+        const items = section.items.filter((item) => {
+          return !q || item.name.toLowerCase().includes(q) || item.url.toLowerCase().includes(q);
+        });
+
+        if (!items.length) return "";
+        visibleCount += items.length;
+
+        const isOpen = q ? true : section.open === true;
+        return `
+          <section class="section" data-open="${isOpen}">
+            <button class="section-header" type="button">
+              <span class="section-title">${svgIcon(section.icon)}<span>${section.name}</span></span>
+              <span></span>
+              <span class="count">${items.length}</span>
+              ${svgIcon("chevron", "icon chevron")}
+            </button>
+            <div class="section-body">
+              <div class="bookmark-grid">
+                ${items.map((item) => `
+                  <a class="bookmark-card" href="${item.url}" title="${item.name} - ${item.url}">
+                    <span class="quick-actions" aria-hidden="true">
+                      <button class="mini-button" type="button" title="Copy URL">${svgIcon("copy")}</button>
+                      <button class="mini-button" type="button" title="Open">${svgIcon("external")}</button>
+                    </span>
+                    ${makeFavicon(item)}
+                    <span class="bookmark-name">${item.name}</span>
+                  </a>
+                `).join("")}
+              </div>
+            </div>
+          </section>
+        `;
+      }).join("");
+
+      app.dataset.empty = visibleCount === 0 ? "true" : "false";
+      bindSections();
+      bindCardButtons();
+    }
+
+    function bindSections() {
+      accordion.querySelectorAll(".section-header").forEach((button) => {
+        button.addEventListener("click", () => {
+          const section = button.closest(".section");
+          section.dataset.open = section.dataset.open !== "true";
+        });
+      });
+    }
+
+    function bindCardButtons() {
+      accordion.querySelectorAll(".mini-button").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+        });
+      });
+    }
+
+    search.addEventListener("input", render);
+    clearSearch.addEventListener("click", () => {
+      search.value = "";
+      search.focus();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
