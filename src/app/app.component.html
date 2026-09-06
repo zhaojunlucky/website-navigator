@@ -11,21 +11,29 @@
   @if (navigation !== null) {
     <!-- Top Navigation Search Bar -->
     <mat-toolbar  class="mat-elevation-z2">
-      <!-- Removed search icon -->
       <form (submit)="onSearch(); $event.preventDefault();" style="flex:1; display:flex; align-items:center;">
         <div style="position: relative; flex: 1; display: flex; align-items: center;">
+          <mat-icon class="search-icon">search</mat-icon>
           <input matInput
+            type="search"
             placeholder="Search the web..."
+            aria-label="Search the web"
             [(ngModel)]="searchQuery"
             name="search"
-            style="margin-left:2px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
+            class="search-input"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="search"
             (input)="onSearchInputChange()"
             [matAutocomplete]="auto" />
           @if (searchQuery) {
             <button
               mat-icon-button
               type="button"
-              style="position: absolute; right: 8px;"
+              class="clear-search-btn"
+              aria-label="Clear search"
               (click)="clearSearch()">
               <mat-icon>clear</mat-icon>
             </button>
@@ -63,14 +71,16 @@
       <mat-accordion>
         @for (category of navigation.categories; track trackByCategory(i, category); let i = $index) {
           <mat-expansion-panel
-            [expanded]="i === 0">
+            [expanded]="isCategoryExpanded(category)"
+            (opened)="onCategoryToggle(category, true)"
+            (closed)="onCategoryToggle(category, false)">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 <mat-icon>{{ category.icon || "folder" }}</mat-icon>
                 {{ category.name }}
               </mat-panel-title>
             </mat-expansion-panel-header>
-            <div class="category-items flex-row" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
+            <div class="category-items flex-row">
               @for (item of category.items; track trackByItem($index, item)) {
                 <a
                   class="nav-link"

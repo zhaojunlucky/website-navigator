@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, PLATFORM_ID, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { NavigationData, NavigationItem } from './navigation.config';
+import { NavigationCategory, NavigationData, NavigationItem } from './navigation.config';
 import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -47,6 +47,7 @@ export class AppComponent implements OnInit {
   showBackToTopButton = false;
   data : any = null
   isDarkMode = false;
+  private expandedCategory: string | null | undefined = undefined;
 
   constructor(
     private http: HttpClient,
@@ -165,6 +166,54 @@ export class AppComponent implements OnInit {
         });
       }
     })
+  }
+
+  private initExpandedCategory() {
+    if (this.expandedCategory !== undefined) return;
+
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        const saved = localStorage.getItem('expandedCategory');
+        if (saved !== null) {
+          this.expandedCategory = saved;
+          return;
+        }
+      } catch (e) {
+        console.error('Error reading expanded category cache:', e);
+      }
+    }
+
+    // Default: expand only the first category
+    this.expandedCategory = this.navigation?.categories[0]?.name ?? null;
+  }
+
+  isCategoryExpanded(category: NavigationCategory) {
+    this.initExpandedCategory();
+    return this.expandedCategory === category.name;
+  }
+
+  onCategoryToggle(category: NavigationCategory, expanded: boolean) {
+    this.initExpandedCategory();
+    if (expanded) {
+      this.expandedCategory = category.name;
+    } else if (this.expandedCategory === category.name) {
+      // Only clear if this category was the one tracked as open — the
+      // accordion emits (closed) for the previously-open panel *after*
+      // (opened) for the newly-opened one, which would otherwise stomp it.
+      this.expandedCategory = null;
+    }
+
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        if (this.expandedCategory) {
+          localStorage.setItem('expandedCategory', this.expandedCategory);
+        } else {
+          localStorage.removeItem('expandedCategory');
+        }
+      } catch (e) {
+        console.error('Error saving expanded category:', e);
+      }
+    }
   }
 
   onSearch() {
