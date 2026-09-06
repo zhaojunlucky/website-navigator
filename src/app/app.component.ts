@@ -47,7 +47,6 @@ export class AppComponent implements OnInit {
   showBackToTopButton = false;
   data : any = null
   isDarkMode = false;
-  private readonly faviconErrors = new WeakSet<NavigationItem>();
 
   constructor(
     private http: HttpClient,
@@ -179,46 +178,8 @@ export class AppComponent implements OnInit {
     if (item.favicon) return item.favicon;
     if (item.icon) return item.icon;
 
-    const url = this.getItemUrl(item);
+    const url = item.content || item.url || '';
     return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`;
-  }
-
-  getItemUrl(item: NavigationItem) {
-    return item.content || item.url || '';
-  }
-
-  onFaviconError(item: NavigationItem) {
-    this.faviconErrors.add(item);
-  }
-
-  hasFaviconError(item: NavigationItem) {
-    return this.faviconErrors.has(item);
-  }
-
-  getFaviconInitial(item: NavigationItem) {
-    return item.name.trim().slice(0, 2).toUpperCase() || '?';
-  }
-
-  getFaviconColor(item: NavigationItem) {
-    const colors = ['#2563eb', '#0f766e', '#7c3aed', '#be123c', '#b45309', '#475569'];
-    const value = item.name
-      .split('')
-      .reduce((total, char) => total + char.charCodeAt(0), 0);
-
-    return colors[value % colors.length];
-  }
-
-  copyItemUrl(item: NavigationItem) {
-    const url = this.getItemUrl(item);
-    if (!url || !isPlatformBrowser(this.platformId) || !navigator.clipboard) {
-      return;
-    }
-
-    navigator.clipboard.writeText(url).then(() => {
-      this.snackBar.open('URL copied', 'Dismiss', { duration: 1800 });
-    }).catch(() => {
-      this.snackBar.open('Unable to copy URL', 'Dismiss', { duration: 3000 });
-    });
   }
 
   updateFilteredItems() {
@@ -252,7 +213,7 @@ export class AppComponent implements OnInit {
 
   selectItem(item: NavigationItem) {
     if (isPlatformBrowser(this.platformId)) {
-      const url = this.getItemUrl(item);
+      const url = item.content || item.url || '';
       if (url) {
         window.location.href = url;
       }

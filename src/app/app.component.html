@@ -1,32 +1,31 @@
-<main class="main">
+<main class="main" style="flex-direction: column; align-items: stretch;">
   <!-- Loading Layer -->
   @if (navigation === null) {
-    <div class="loading-container">
+    <div class="loading-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%;">
       <mat-spinner diameter="40"></mat-spinner>
-      <p>Loading navigation data...</p>
+      <p style="margin-top: 20px; font-size: 16px; color: #555;">Loading navigation data...</p>
     </div>
   }
 
   <!-- Main Content - Only shown when navigation is loaded -->
   @if (navigation !== null) {
     <!-- Top Navigation Search Bar -->
-    <mat-toolbar class="mat-elevation-z2 app-toolbar">
+    <mat-toolbar  class="mat-elevation-z2">
       <!-- Removed search icon -->
-      <form class="search-form" (submit)="onSearch(); $event.preventDefault();">
-        <div class="search-field">
+      <form (submit)="onSearch(); $event.preventDefault();" style="flex:1; display:flex; align-items:center;">
+        <div style="position: relative; flex: 1; display: flex; align-items: center;">
           <input matInput
             placeholder="Search the web..."
             [(ngModel)]="searchQuery"
             name="search"
-            class="search-input"
+            style="margin-left:2px; flex:1; min-width:0; font-size: 1.25rem; height: 3rem; padding: 0 1rem; border-radius: 0.5rem;"
             (input)="onSearchInputChange()"
             [matAutocomplete]="auto" />
           @if (searchQuery) {
             <button
               mat-icon-button
               type="button"
-              class="search-clear"
-              aria-label="Clear search"
+              style="position: absolute; right: 8px;"
               (click)="clearSearch()">
               <mat-icon>clear</mat-icon>
             </button>
@@ -35,20 +34,10 @@
         <mat-autocomplete #auto="matAutocomplete">
           @for (item of filteredItems; track trackByFilteredItem($index, item)) {
             <mat-option [value]="item.name" (click)="selectItem(item)">
-              <div class="autocomplete-item">
-                @if (!hasFaviconError(item)) {
-                  <img
-                    [ngSrc]="getFaviconUrl(item)"
-                    (error)="onFaviconError(item)"
-                    alt=""
-                    width="16"
-                    height="16"
-                    loading="lazy" />
-                } @else {
-                  <span class="autocomplete-fallback">{{ getFaviconInitial(item) }}</span>
-                }
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img [ngSrc]="getFaviconUrl(item)" alt="favicon" width="16" height="16" loading="lazy" />
                 <span>{{ item.name }}</span>
-                <span class="autocomplete-category">{{ item.category }}</span>
+                <span style="color: #777; font-size: 0.8em; margin-left: auto;">{{ item.category }}</span>
               </div>
             </mat-option>
           }
@@ -78,49 +67,27 @@
             <mat-expansion-panel-header>
               <mat-panel-title>
                 <mat-icon>{{ category.icon || "folder" }}</mat-icon>
-                <span class="category-name">{{ category.name }}</span>
-                <span class="item-count">{{ category.items.length }}</span>
+                {{ category.name }}
               </mat-panel-title>
             </mat-expansion-panel-header>
-            <div class="category-items">
+            <div class="category-items flex-row" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; width: 100%;">
               @for (item of category.items; track trackByItem($index, item)) {
-                <div
-                  class="nav-card"
-                  [style.--favicon-color]="getFaviconColor(item)"
-                  [matTooltip]="item.name + ' (' + getItemUrl(item) + ')'">
-                  <a
-                    class="nav-link"
-                    [href]="getItemUrl(item)"
-                    rel="noopener"
-                    matRipple
-                    [attr.aria-label]="item.name">
-                    <span class="favicon-shell">
-                      @if (!hasFaviconError(item)) {
-                        <img
-                          [ngSrc]="getFaviconUrl(item)"
-                          (error)="onFaviconError(item)"
-                          alt=""
-                          class="favicon"
-                          width="32"
-                          height="32"
-                          loading="lazy"
-                          fetchpriority="low"/>
-                      } @else {
-                        <span class="favicon-fallback">{{ getFaviconInitial(item) }}</span>
-                      }
-                    </span>
-                    <span class="nav-label" title="{{ item.name }}">{{ item.name }}</span>
-                  </a>
-                  <button
-                    mat-icon-button
-                    type="button"
-                    class="card-action"
-                    aria-label="Copy URL"
-                    matTooltip="Copy URL"
-                    (click)="copyItemUrl(item)">
-                    <mat-icon>content_copy</mat-icon>
-                  </button>
-                </div>
+                <a
+                  class="nav-link"
+                  [href]="item.content || item.url"
+                  rel="noopener"
+                  matRipple
+                  [matTooltip]="item.name + ' (' + (item.content || item.url) + ')'">
+                  <img
+                    ngSrc="{{getFaviconUrl(item)}}"
+                    alt="favicon"
+                    class="favicon"
+                    width="24"
+                    height="24"
+                    loading="lazy"
+                    fetchpriority="low"/>
+                  <span title="{{ item.name }}">{{ item.name }}</span>
+                </a>
               }
             </div>
           </mat-expansion-panel>
