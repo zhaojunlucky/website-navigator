@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  navAPI: 'http://localhost:8080/api/bookmark/collection/instances/2'
+  apiServer: 'http://test.magicworldz.de:8080',
+  bookmarkUiUrl: 'http://localhost:4200/url-bookmark'
 };
 
 /*

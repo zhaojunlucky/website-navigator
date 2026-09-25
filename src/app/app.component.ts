@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, PLATFORM_ID, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, PLATFORM_ID, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NavigationCategory, NavigationData, NavigationItem } from './navigation.config';
 import { NgOptimizedImage } from '@angular/common';
@@ -13,8 +13,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -32,29 +32,105 @@ import { environment } from '../environments/environment';
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatMenuModule,
-    MatSnackBarModule,
     NgOptimizedImage
 ],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   navigation:NavigationData | null = null;
   searchQuery = '';
   filteredItems: any[] = [];
-  navAPI = environment.navAPI;
+  readonly bookmarkUiUrl = environment.bookmarkUiUrl;
+  readonly bindingKey = `navigator:${environment.apiServer}:userId`;
+  userId: string | null = null;
+  state: 'binding' | 'loading' | 'loaded' | 'error' = 'binding';
+  invalidBinding = false;
+  storageNotice = '';
+  refreshError = false;
+  refreshing = false;
+  private request?: Subscription;
   showBackToTopButton = false;
   data : any = null
   isDarkMode = false;
   private expandedCategory: string | null | undefined = undefined;
 
+
+  private get cacheKey() {
+    return `navigator:${environment.apiServer}:${this.userId}:navigation`;
+  }
+
+  private get expandedKey() {
+    return `navigator:${environment.apiServer}:${this.userId}:expandedCategory`;
+  }
+
+  private validUserId(value: string | null): value is string {
+    return value !== null && /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value));
+  }
+
+  private readStorage(key: string): string | null {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  private initializeBinding() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const ids = new URLSearchParams(window.location.search).getAll('userId');
+    if (ids.length) {
+      if (ids.length !== 1 || !this.validUserId(ids[0])) {
+        this.invalidBinding = true;
+        return;
+      }
+      this.userId = ids[0];
+      try {
+        localStorage.setItem(this.bindingKey, this.userId);
+      } catch {
+        this.storageNotice = 'Bookmark this URL to keep your bookmarks connected.';
+      }
+    } else {
+      const saved = this.readStorage(this.bindingKey);
+      if (this.validUserId(saved)) this.userId = saved;
+    }
+    if (this.userId) this.loadNavigation();
+  }
+
+  changeBinding() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.request?.unsubscribe();
+    this.storageNotice = '';
+    try {
+      localStorage.removeItem(this.bindingKey);
+    } catch {
+      this.storageNotice = 'Unable to clear the saved binding. Clear this site’s storage in your browser before your next visit.';
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('userId');
+    window.history.replaceState(window.history.state, '', url);
+    this.userId = null;
+    this.navigation = null;
+    this.data = null;
+    this.searchQuery = '';
+    this.filteredItems = [];
+    this.expandedCategory = undefined;
+    this.invalidBinding = false;
+    this.refreshError = false;
+    this.refreshing = false;
+    this.state = 'binding';
+  }
+
+  ngOnDestroy() {
+    this.request?.unsubscribe();
+  }
+
   constructor(
     private http: HttpClient,
-    private snackBar: MatSnackBar,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    this.loadNavigation();
+    this.initializeBinding();
   }
 
   ngOnInit() {
@@ -109,63 +185,53 @@ export class AppComponent implements OnInit {
   }
 
   loadNavigation() {
-    if (isPlatformBrowser(this.platformId)) {
-      let cache = localStorage.getItem('navigation')
-      if (cache) {
-        try {
-          this.data = JSON.parse(cache);
-          this.navigation = this.data.data;
-          if (new Date().getTime() - this.data.time > 3600 * 4 * 1000) {
-            this.refreshNavigation()
-          }
-          this.updateFilteredItems();
-        } catch (e) {
-          console.error('Error parsing navigation cache:', e);
-          this.refreshNavigation();
-        }
-      } else {
-        this.refreshNavigation()
+    if (!this.userId || !isPlatformBrowser(this.platformId)) return;
+    const cache = this.readStorage(this.cacheKey);
+    if (cache) {
+      try {
+        const parsed = JSON.parse(cache);
+        if (!Number.isFinite(parsed.time) || !Array.isArray(parsed.data?.categories) ||
+            typeof parsed.data?.searchEngine !== 'string') throw new Error('Invalid cache');
+        this.data = parsed;
+        this.navigation = parsed.data;
+        this.state = 'loaded';
+        this.updateFilteredItems();
+        if (Date.now() - parsed.time > 4 * 3600 * 1000) this.refreshNavigation();
+        return;
+      } catch {
+        // A malformed cache must not prevent fetching the current user's data.
       }
-    } else {
-      // Server-side rendering case - use empty navigation structure
-      this.navigation = {
-        searchEngine: "https://www.google.com/search?q=[VEDA]",
-        categories: []
-      };
-      this.updateFilteredItems();
     }
+    this.refreshNavigation();
   }
 
   refreshNavigation() {
-    this.http.get<NavigationData>(this.navAPI).subscribe({
+    if (!this.userId || !isPlatformBrowser(this.platformId)) return;
+    this.request?.unsubscribe();
+    this.refreshError = false;
+    this.refreshing = true;
+    if (!this.navigation) this.state = 'loading';
+    this.request = this.http.get<NavigationData>(
+      `${environment.apiServer}/api/bookmark/collection/instances/${this.userId}`
+    ).subscribe({
       next: (data) => {
         this.navigation = data;
-        if (isPlatformBrowser(this.platformId)) {
-          this.data = {data: data, time: new Date().getTime()}
-          try {
-            localStorage.setItem('navigation', JSON.stringify(this.data));
-          } catch (e) {
-            console.error('Error saving navigation to localStorage:', e);
-          }
+        this.data = {data, time: Date.now()};
+        this.state = 'loaded';
+        this.refreshing = false;
+        try {
+          localStorage.setItem(this.cacheKey, JSON.stringify(this.data));
+        } catch {
+          // Navigation remains usable without an offline cache.
         }
         this.updateFilteredItems();
       },
-      error: (error) => {
-        console.error('Error fetching navigation data:', error);
-        // Fallback to empty navigation if API fails
-        if (!this.navigation) {
-          this.navigation = {
-            searchEngine: "https://www.google.com/search?q=[VEDA]",
-            categories: []
-          };
-          this.updateFilteredItems();
-        }
-        this.snackBar.open(`Error refreshing navigation data: ${error.message || JSON.stringify(error)}`, 'Dismiss', {
-          duration: 5000,
-          panelClass: ['error-snackbar']
-        });
+      error: () => {
+        this.refreshing = false;
+        this.refreshError = true;
+        this.state = this.navigation ? 'loaded' : 'error';
       }
-    })
+    });
   }
 
   private initExpandedCategory() {
@@ -173,7 +239,7 @@ export class AppComponent implements OnInit {
 
     if (isPlatformBrowser(this.platformId)) {
       try {
-        const saved = localStorage.getItem('expandedCategory');
+        const saved = localStorage.getItem(this.expandedKey);
         if (saved !== null) {
           this.expandedCategory = saved;
           return;
@@ -206,9 +272,9 @@ export class AppComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       try {
         if (this.expandedCategory) {
-          localStorage.setItem('expandedCategory', this.expandedCategory);
+          localStorage.setItem(this.expandedKey, this.expandedCategory);
         } else {
-          localStorage.removeItem('expandedCategory');
+          localStorage.removeItem(this.expandedKey);
         }
       } catch (e) {
         console.error('Error saving expanded category:', e);

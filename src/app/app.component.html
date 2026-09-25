@@ -1,6 +1,31 @@
 <main class="main" style="flex-direction: column; align-items: stretch;">
+  @if (storageNotice) {
+    <p class="status-notice" role="status">{{ storageNotice }}</p>
+  }
+  @if (state === 'binding') {
+    <section class="setup-panel" aria-labelledby="binding-title">
+      <mat-icon>bookmark_border</mat-icon>
+      <h2 id="binding-title">Bind your bookmarks</h2>
+      @if (invalidBinding) {
+        <p role="alert">This link contains an invalid user ID. Open Navigator again from Virtue to bind your bookmarks.</p>
+      }
+      <p>Open URL Bookmarks in Virtue, sign in, then click “Open Navigator” to load your bookmarks here.</p>
+      <a mat-raised-button [href]="bookmarkUiUrl">Open URL Bookmarks</a>
+    </section>
+  }
+  @if (state === 'error') {
+    <section class="setup-panel" aria-labelledby="error-title">
+      <h2 id="error-title">Unable to load bookmarks</h2>
+      <p role="alert">Please try again or open URL Bookmarks to check your account.</p>
+      <div class="setup-actions">
+        <button mat-raised-button (click)="refreshNavigation()">Retry</button>
+        <a mat-button [href]="bookmarkUiUrl">Open URL Bookmarks</a>
+        <button mat-button (click)="changeBinding()">Change account binding</button>
+      </div>
+    </section>
+  }
   <!-- Loading Layer -->
-  @if (navigation === null) {
+  @if (state === 'loading') {
     <div class="loading-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%;">
       <mat-spinner diameter="40"></mat-spinner>
       <p style="margin-top: 20px; font-size: 16px; color: #555;">Loading navigation data...</p>
@@ -54,18 +79,30 @@
           <mat-icon>arrow_forward</mat-icon>
         </button>
         <!-- Menu Button -->
-        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu">
+        <button mat-icon-button [matMenuTriggerFor]="menu" type="button" aria-label="Menu">
           <mat-icon>more_vert</mat-icon>
         </button>
         <!-- Menu -->
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="refreshNavigation()">
+          <button mat-menu-item type="button" [disabled]="refreshing" (click)="refreshNavigation()">
             <mat-icon>refresh</mat-icon>
             <span>Refresh</span>
+          </button>
+          <a mat-menu-item [href]="bookmarkUiUrl">
+            <mat-icon>bookmarks</mat-icon><span>Open URL Bookmarks</span>
+          </a>
+          <button mat-menu-item type="button" (click)="changeBinding()">
+            <mat-icon>manage_accounts</mat-icon><span>Change account binding</span>
           </button>
         </mat-menu>
       </form>
     </mat-toolbar>
+    @if (refreshError) {
+      <div class="status-notice" role="alert">
+        Unable to refresh bookmarks. Showing saved data.
+        <button mat-button (click)="refreshNavigation()">Retry</button>
+      </div>
+    }
     <!-- Category Navigation -->
     <div class="categories-container">
       <mat-accordion>
@@ -111,7 +148,7 @@
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-left">
-          <p>&copy; 2025-2026 Website Navigator By <a href="https://exia.app/url-bookmark">Jun</a></p>
+          <p>&copy; 2025-2026 Website Navigator By <a [href]="bookmarkUiUrl">Jun</a></p>
         </div>
         <div class="footer-right">
           <p>{{ getLastRefreshTime() }}</p>
