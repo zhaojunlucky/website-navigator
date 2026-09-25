@@ -18,7 +18,7 @@ jobs:
       contents: read
       id-token: write
     env:
-      CANDIDATE_PATH: website-navigator/ci/pr-${{ github.event.pull_request.number }}-1.0.${{ github.run_number }}
+      CANDIDATE_PATH: website-navigator-ci/pr-${{ github.event.pull_request.number }}-1.0.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
 
@@ -60,7 +60,7 @@ jobs:
           target: nora.exia.app/${{ env.CANDIDATE_PATH }}/checksums.sha256
 
       # Publish the manifest only after all candidate files are available.
-      # The promoter owns release/ and release/latest.json, not this workflow.
+      # The promoter owns website-navigator/<version>/ and website-navigator/latest.json.
       - name: Push candidate index
         if: github.event.pull_request.head.repo.full_name == github.repository
         uses: zhaojunlucky/exia-nora-push-action/raw@v1

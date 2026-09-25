@@ -75,7 +75,7 @@ Development uses Navigator on port 4201 and Virtue on port 4200. `apiServer` mus
 Versions follow `1.0.<github.run_number>`. A PR candidate is uploaded to:
 
 ```text
-nora.exia.app/website-navigator/ci/pr-<pr>-1.0.<run>/
+nora.exia.app/website-navigator-ci/pr-<pr>-1.0.<run>/
 ├── website-navigator.zip
 ├── checksums.sha256
 └── index.json
@@ -83,7 +83,7 @@ nora.exia.app/website-navigator/ci/pr-<pr>-1.0.<run>/
 
 The ZIP contains **all contents of `dist/website-navigator/`**, including `browser/` and top-level build metadata, without an extra `website-navigator/` wrapper. The index uses the promoter's `versioned-run` layout and records the archive's file name, version, byte count, and SHA-256. Checksums and the archive upload first; `index.json` uploads last. `checksums.sha256` is a candidate convenience file; the index lists the application archive as the release artifact.
 
-CI never writes `release/` or `release/latest.json`. Reruns keep the original run number, matching the reference workflow: already-published Nora paths are immutable and fail on re-upload rather than being overwritten. A new workflow run gets a new candidate version.
+CI writes only `website-navigator-ci/`. The promoter publishes the archive and version index under `website-navigator/1.0.<run>/`, then updates `website-navigator/latest.json`. Reruns keep the original run number, matching the reference workflow: already-published Nora paths are immutable and fail on re-upload rather than being overwritten. A new workflow run gets a new candidate version.
 
 To package a local production build (requires `zip`; packaging tests also require `unzip`):
 
@@ -93,10 +93,10 @@ GITHUB_RUN_NUMBER=42 node tools/package-candidate.mjs
 node --test tools/package-candidate.test.mjs
 ```
 
-Files are generated in `dist/candidate/`. The candidate index is accessible through the artifact gateway only if its raw allowlist maps `website-navigator` to the `website-navigator` prefix and permits `ci/**`:
+Files are generated in `dist/candidate/`. The candidate index is accessible through the artifact gateway only if its raw allowlist maps `website-navigator-ci` to the `website-navigator-ci` prefix and permits the candidate paths:
 
 ```text
-https://exia-artifact-promoter.exia.app/raw/cdn/website-navigator/ci/pr-<pr>-1.0.<run>/index.json
+https://exia-artifact-promoter.exia.app/raw/cdn/website-navigator-ci/pr-<pr>-1.0.<run>/index.json
 ```
 
-Gateway configuration and promotion deployment are managed separately. The inspected promoter currently attempts Docker promotion alongside raw promotion; raw-only repositories need that behavior adjusted to avoid reporting missing-image failures after raw artifacts are promoted.
+Gateway configuration and promotion deployment are managed separately. Nora OIDC permissions must allow uploads to `website-navigator-ci/`. The updated promoter requires this layout without legacy path fallback and supports raw-only promotion.
