@@ -67,3 +67,36 @@ A valid URL user ID overrides the saved binding. Navigator remembers it in local
 Use **Change account binding** in the menu to clear the binding and return to setup. Data and expanded-category caches are isolated by API environment and user ID; old unscoped caches are ignored.
 
 Development uses Navigator on port 4201 and Virtue on port 4200. `apiServer` must match Virtue's API environment (currently `http://test.magicworldz.de:8080` in development); `bookmarkUiUrl` points to that environment's Virtue `/url-bookmark` page. Configure both in `src/environments/environment*.ts`.
+
+## CI candidates
+
+`.github/workflows/ci.yml` builds pull requests targeting `main` with Node 24 and the Yarn version pinned in `package.json`. It installs with `--immutable`, runs packaging and ChromeHeadless application tests, and builds the production app. Build, packaging, and Nora uploads run in one job, using local files without a GitHub artifact transfer. Same-repository PRs publish through `zhaojunlucky/exia-nora-push-action/raw@v1` using Nora OIDC; fork PRs build and test without publishing. Nora must authorize this repository's workflow identity for the candidate prefix.
+
+Versions follow `1.0.<github.run_number>`. A PR candidate is uploaded to:
+
+```text
+nora.exia.app/website-navigator/ci/pr-<pr>-1.0.<run>/
+├── website-navigator.zip
+├── checksums.sha256
+└── index.json
+```
+
+The ZIP contains **all contents of `dist/website-navigator/`**, including `browser/` and top-level build metadata, without an extra `website-navigator/` wrapper. The index uses the promoter's `versioned-run` layout and records the archive's file name, version, byte count, and SHA-256. Checksums and the archive upload first; `index.json` uploads last. `checksums.sha256` is a candidate convenience file; the index lists the application archive as the release artifact.
+
+CI never writes `release/` or `release/latest.json`. Reruns keep the original run number, matching the reference workflow: already-published Nora paths are immutable and fail on re-upload rather than being overwritten. A new workflow run gets a new candidate version.
+
+To package a local production build (requires `zip`; packaging tests also require `unzip`):
+
+```sh
+yarn build --configuration production
+GITHUB_RUN_NUMBER=42 node tools/package-candidate.mjs
+node --test tools/package-candidate.test.mjs
+```
+
+Files are generated in `dist/candidate/`. The candidate index is accessible through the artifact gateway only if its raw allowlist maps `website-navigator` to the `website-navigator` prefix and permits `ci/**`:
+
+```text
+https://exia-artifact-promoter.exia.app/raw/cdn/website-navigator/ci/pr-<pr>-1.0.<run>/index.json
+```
+
+Gateway configuration and promotion deployment are managed separately. The inspected promoter currently attempts Docker promotion alongside raw promotion; raw-only repositories need that behavior adjusted to avoid reporting missing-image failures after raw artifacts are promoted.

@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CANDIDATE_PATH: website-navigator/ci/pr-${{ github.event.pull_request.number }}-1.0.${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Enable pinned Yarn
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Test candidate packaging
+        run: node --test tools/package-candidate.test.mjs
+
+      - name: Test application
+        run: yarn test --watch=false --browsers=ChromeHeadless
+
+      - name: Build production application
+        run: yarn build --configuration production
+
+      - name: Package CI candidate
+        run: node tools/package-candidate.mjs
+
+      # Fork PRs build and test, but only same-repository PRs publish.
+      - name: Push application archive
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: zhaojunlucky/exia-nora-push-action/raw@v1
+        with:
+          file: dist/candidate/website-navigator.zip
+          target: nora.exia.app/${{ env.CANDIDATE_PATH }}/website-navigator.zip
+
+      - name: Push checksums
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: zhaojunlucky/exia-nora-push-action/raw@v1
+        with:
+          file: dist/candidate/checksums.sha256
+          target: nora.exia.app/${{ env.CANDIDATE_PATH }}/checksums.sha256
+
+      # Publish the manifest only after all candidate files are available.
+      # The promoter owns release/ and release/latest.json, not this workflow.
+      - name: Push candidate index
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: zhaojunlucky/exia-nora-push-action/raw@v1
+        with:
+          file: dist/candidate/index.json
+          target: nora.exia.app/${{ env.CANDIDATE_PATH }}/index.json
