@@ -51,6 +51,7 @@ jobs:
         with:
           file: dist/candidate/website-navigator.zip
           target: nora.exia.app/${{ env.CANDIDATE_PATH }}/website-navigator.zip
+          record: ${{ runner.temp }}/nora-push.json
 
       - name: Push checksums
         if: github.event.pull_request.head.repo.full_name == github.repository
@@ -58,6 +59,7 @@ jobs:
         with:
           file: dist/candidate/checksums.sha256
           target: nora.exia.app/${{ env.CANDIDATE_PATH }}/checksums.sha256
+          record: ${{ runner.temp }}/nora-push.json
 
       # Publish the manifest only after all candidate files are available.
       # The promoter owns website-navigator/<version>/ and website-navigator/latest.json.
@@ -67,3 +69,13 @@ jobs:
         with:
           file: dist/candidate/index.json
           target: nora.exia.app/${{ env.CANDIDATE_PATH }}/index.json
+          record: ${{ runner.temp }}/nora-push.json
+
+      # Authoritative record of what this run actually pushed to Nora - see
+      # https://github.com/zhaojunlucky/exia-nora-push-action#recording-what-actually-got-pushed
+      - name: Upload Nora push record
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-push-record
+          path: ${{ runner.temp }}/nora-push.json
